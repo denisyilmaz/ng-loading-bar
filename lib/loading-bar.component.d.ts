@@ -12,6 +12,8 @@ export declare class NgLoadingBarComponent implements AfterViewInit {
     private _startSize;
     private _started;
     private _status;
+    private state;
+    private width;
     private _incTimeout;
     private _completeTimeout;
     private _startTimeout;
@@ -21,7 +23,6 @@ export declare class NgLoadingBarComponent implements AfterViewInit {
     private set(n);
     private complete();
     private inc();
-    private show(el);
-    private hide(el);
-    private setElementStyle(el, styleName, styleValue);
+    private show();
+    private hide();
 }

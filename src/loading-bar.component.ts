@@ -1,13 +1,23 @@
 import { Inject, Component, ViewChild, Renderer, AfterViewInit, Input } from '@angular/core';
+import {trigger, state, animate, style, transition} from '@angular/animations';
 import { Http } from '@angular/http';
 import { NgLoadingBarHttp } from './loading-bar.http';
 
 @Component({
     selector: 'ng-loading-bar',
     template: `
-        <div id="loading-bar-spinner" #loadingBarSpinner><div class="spinner-icon"></div></div>
-        <div id="loading-bar" #loadingBarContainer><div class="bar" #loadingBar><div class="peg"></div></div></div>
+        <div id="loading-bar-spinner" #loadingBarSpinner [@fadeInOut]="state"><div class="spinner-icon"></div></div>
+        <div id="loading-bar" #loadingBarContainer [@fadeInOut]="state"><div class="bar" #loadingBar [style.width]="width"></div></div>
     `,
+    animations: [
+        trigger('fadeInOut', [
+            state('void', style({opacity: 0}) ),
+            state('true', style({opacity: 1}) ),
+            state('false', style({opacity: 0}) ),
+            transition('0 <=> 1', animate('0.35s linear')),
+            transition('* <=> void', animate('0.35s linear'))
+        ])
+    ]
 })
 export class NgLoadingBarComponent implements AfterViewInit {
     @ViewChild('loadingBarSpinner') _spinner: any;
@@ -24,6 +34,9 @@ export class NgLoadingBarComponent implements AfterViewInit {
     private _started: boolean = false;
     private _status: number = 0;
 
+    private state:boolean = false; 
+    private width:string = '0%';
+
     private _incTimeout: any;
     private _completeTimeout: any;
 
@@ -39,8 +52,7 @@ export class NgLoadingBarComponent implements AfterViewInit {
     }
 
     ngAfterViewInit() {
-        this.hide(this._loadingBarContainer);
-        this.hide(this._spinner);
+        this.hide();
     }
 
     /**
@@ -57,12 +69,8 @@ export class NgLoadingBarComponent implements AfterViewInit {
             this._started = true;
             this._status = 0;
 
-            if (this._includeBar) {
-                this.show(this._loadingBarContainer);
-            }
-
-            if (this.includeSpinner) {
-                this.show(this._spinner);
+            if (this._includeBar || this.includeSpinner) {
+                this.show();
             }
 
             this.set(this._startSize);
@@ -76,7 +84,7 @@ export class NgLoadingBarComponent implements AfterViewInit {
     private set(n): void {
         if (!this._started) { return; }
         const pct = (n * 100) + '%';
-        this.setElementStyle(this._loadingBar, 'width', pct);
+        this.width = pct;
         this._status = n;
 
         // increment loadingbar to give the illusion that there is always
@@ -100,8 +108,7 @@ export class NgLoadingBarComponent implements AfterViewInit {
             // Attempt to aggregate any start/complete calls within 500ms:
             this._completeTimeout = setTimeout(() => {
                 this._started = false;
-                this.hide(this._loadingBarContainer);
-                this.hide(this._spinner);
+                this.hide();
             }, 500);
         }, this._latencyThreshold);
     }
@@ -138,13 +145,10 @@ export class NgLoadingBarComponent implements AfterViewInit {
         this.set(pct);
     }
 
-    private show(el: any): void {
-        this.setElementStyle(el, 'display', 'block');
+    private show(): void {
+        this.state = true;
     }
-    private hide(el: any): void {
-        this.setElementStyle(el, 'display', 'none');
-    }
-    private setElementStyle(el: any, styleName: string, styleValue: string): void {
-        this._renderer.setElementStyle(el.nativeElement, styleName, styleValue);
+    private hide(): void {
+        this.state = false;
     }
 }

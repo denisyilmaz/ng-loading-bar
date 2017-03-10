@@ -28,6 +28,7 @@
     "test-watch": "./node_modules/.bin/karma start --no-single-run --auto-watch"
   },
   "devDependencies": {
+    "@angular/animations": "^4.0.0-rc.2",
     "@angular/common": "^4.0.0-rc.2",
     "@angular/compiler": "^4.0.0-rc.2",
     "@angular/compiler-cli": "^4.0.0-rc.2",

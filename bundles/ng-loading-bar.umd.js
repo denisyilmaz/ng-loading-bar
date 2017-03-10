@@ -1,13 +1,13 @@
 (function webpackUniversalModuleDefinition(root, factory) {
 	if(typeof exports === 'object' && typeof module === 'object')
-		module.exports = factory(require("@angular/core"), require("@angular/http"), require("rxjs/Subject"), require("rxjs/add/operator/share"));
+		module.exports = factory(require("@angular/core"), require("@angular/http"), require("rxjs/Subject"), require("rxjs/add/operator/share"), require("@angular/animations"));
 	else if(typeof define === 'function' && define.amd)
-		define(["@angular/core", "@angular/http", "rxjs/Subject", "rxjs/add/operator/share"], factory);
+		define(["@angular/core", "@angular/http", "rxjs/Subject", "rxjs/add/operator/share", "@angular/animations"], factory);
 	else if(typeof exports === 'object')
-		exports["ng-loading-bar"] = factory(require("@angular/core"), require("@angular/http"), require("rxjs/Subject"), require("rxjs/add/operator/share"));
+		exports["ng-loading-bar"] = factory(require("@angular/core"), require("@angular/http"), require("rxjs/Subject"), require("rxjs/add/operator/share"), require("@angular/animations"));
 	else
-		root["ng-loading-bar"] = factory(root["@angular/core"], root["@angular/http"], root["rxjs/Subject"], root["rxjs/add/operator/share"]);
-})(this, function(__WEBPACK_EXTERNAL_MODULE_2__, __WEBPACK_EXTERNAL_MODULE_3__, __WEBPACK_EXTERNAL_MODULE_5__, __WEBPACK_EXTERNAL_MODULE_6__) {
+		root["ng-loading-bar"] = factory(root["@angular/core"], root["@angular/http"], root["rxjs/Subject"], root["rxjs/add/operator/share"], root["@angular/animations"]);
+})(this, function(__WEBPACK_EXTERNAL_MODULE_2__, __WEBPACK_EXTERNAL_MODULE_3__, __WEBPACK_EXTERNAL_MODULE_5__, __WEBPACK_EXTERNAL_MODULE_6__, __WEBPACK_EXTERNAL_MODULE_8__) {
 return /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
 /******/ 	var installedModules = {};
@@ -212,6 +212,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return function (target, key) { decorator(target, key, paramIndex); }
 	};
 	var core_1 = __webpack_require__(2);
+	var animations_1 = __webpack_require__(8);
 	var http_1 = __webpack_require__(3);
 	var loading_bar_http_1 = __webpack_require__(4);
 	var NgLoadingBarComponent = (function () {
@@ -225,6 +226,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	        this._startSize = 0.02;
 	        this._started = false;
 	        this._status = 0;
+	        this.state = false;
+	        this.width = '0%';
 	        if (http instanceof loading_bar_http_1.NgLoadingBarHttp) {
 	            http.pending.subscribe(function (progress) {
 	                if (progress.started)
@@ -235,8 +238,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 	    }
 	    NgLoadingBarComponent.prototype.ngAfterViewInit = function () {
-	        this.hide(this._loadingBarContainer);
-	        this.hide(this._spinner);
+	        this.hide();
 	    };
 	    NgLoadingBarComponent.prototype.start = function () {
 	        var _this = this;
@@ -247,11 +249,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	            }
 	            _this._started = true;
 	            _this._status = 0;
-	            if (_this._includeBar) {
-	                _this.show(_this._loadingBarContainer);
-	            }
-	            if (_this.includeSpinner) {
-	                _this.show(_this._spinner);
+	            if (_this._includeBar || _this.includeSpinner) {
+	                _this.show();
 	            }
 	            _this.set(_this._startSize);
 	        }, this._latencyThreshold);
@@ -262,7 +261,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            return;
 	        }
 	        var pct = (n * 100) + '%';
-	        this.setElementStyle(this._loadingBar, 'width', pct);
+	        this.width = pct;
 	        this._status = n;
 	        if (this._autoIncrement) {
 	            clearTimeout(this._incTimeout);
@@ -279,8 +278,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            clearTimeout(_this._startTimeout);
 	            _this._completeTimeout = setTimeout(function () {
 	                _this._started = false;
-	                _this.hide(_this._loadingBarContainer);
-	                _this.hide(_this._spinner);
+	                _this.hide();
 	            }, 500);
 	        }, this._latencyThreshold);
 	    };
@@ -308,14 +306,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	        var pct = this._status + rnd;
 	        this.set(pct);
 	    };
-	    NgLoadingBarComponent.prototype.show = function (el) {
-	        this.setElementStyle(el, 'display', 'block');
+	    NgLoadingBarComponent.prototype.show = function () {
+	        this.state = true;
 	    };
-	    NgLoadingBarComponent.prototype.hide = function (el) {
-	        this.setElementStyle(el, 'display', 'none');
-	    };
-	    NgLoadingBarComponent.prototype.setElementStyle = function (el, styleName, styleValue) {
-	        this._renderer.setElementStyle(el.nativeElement, styleName, styleValue);
+	    NgLoadingBarComponent.prototype.hide = function () {
+	        this.state = false;
 	    };
 	    return NgLoadingBarComponent;
 	}());
@@ -338,13 +333,28 @@ return /******/ (function(modules) { // webpackBootstrap
 	NgLoadingBarComponent = __decorate([
 	    core_1.Component({
 	        selector: 'ng-loading-bar',
-	        template: "\n        <div id=\"loading-bar-spinner\" #loadingBarSpinner><div class=\"spinner-icon\"></div></div>\n        <div id=\"loading-bar\" #loadingBarContainer><div class=\"bar\" #loadingBar><div class=\"peg\"></div></div></div>\n    ",
+	        template: "\n        <div id=\"loading-bar-spinner\" #loadingBarSpinner [@fadeInOut]=\"state\"><div class=\"spinner-icon\"></div></div>\n        <div id=\"loading-bar\" #loadingBarContainer [@fadeInOut]=\"state\"><div class=\"bar\" #loadingBar [style.width]=\"width\"></div></div>\n    ",
+	        animations: [
+	            animations_1.trigger('fadeInOut', [
+	                animations_1.state('void', animations_1.style({ opacity: 0 })),
+	                animations_1.state('true', animations_1.style({ opacity: 1 })),
+	                animations_1.state('false', animations_1.style({ opacity: 0 })),
+	                animations_1.transition('0 <=> 1', animations_1.animate('0.35s linear')),
+	                animations_1.transition('* <=> void', animations_1.animate('0.35s linear'))
+	            ])
+	        ]
 	    }),
 	    __param(1, core_1.Inject(http_1.Http)),
 	    __metadata("design:paramtypes", [core_1.Renderer, loading_bar_http_1.NgLoadingBarHttp])
 	], NgLoadingBarComponent);
 	exports.NgLoadingBarComponent = NgLoadingBarComponent;
 
+
+/***/ },
+/* 8 */
+/***/ function(module, exports) {
+
+	module.exports = __WEBPACK_EXTERNAL_MODULE_8__;
 
 /***/ }
 /******/ ])
